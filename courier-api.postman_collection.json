@@ -1,0 +1,172 @@
+{
+  "info": {
+    "name": "Courier Management API",
+    "_postman_id": "9b1e7c52-1234-5678-9abc-def012345678",
+    "description": "API Collection for Courier CRUD with multi-keyword search, level filtering, and custom sorting.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Get Couriers (Default: Name ASC & Pagination)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/couriers?per_page=10&page=1",
+          "host": ["{{base_url}}"],
+          "path": ["couriers"],
+          "query": [
+            { "key": "per_page", "value": "10" },
+            { "key": "page", "value": "1" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. Get Couriers (Sort by Registered Date DESC)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/couriers?sort_by=registered_at&order=desc",
+          "host": ["{{base_url}}"],
+          "path": ["couriers"],
+          "query": [
+            { "key": "sort_by", "value": "registered_at" },
+            { "key": "order", "value": "desc" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Search Couriers (Multi-keyword 'budi agung')",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/couriers?search=budi+agung",
+          "host": ["{{base_url}}"],
+          "path": ["couriers"],
+          "query": [
+            { "key": "search", "value": "budi+agung" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Filter Couriers by Level (?level=2,3)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/couriers?level=2,3",
+          "host": ["{{base_url}}"],
+          "path": ["couriers"],
+          "query": [
+            { "key": "level", "value": "2,3" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Get Single Courier (Show)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/couriers/1",
+          "host": ["{{base_url}}"],
+          "path": ["couriers", "1"]
+        }
+      }
+    },
+    {
+      "name": "6. Store Courier (Success - 201)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Joko Susilo\",\n  \"phone\": \"081999888777\",\n  \"email\": \"joko.susilo@example.com\",\n  \"level\": 3,\n  \"is_active\": true\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/couriers",
+          "host": ["{{base_url}}"],
+          "path": ["couriers"]
+        }
+      }
+    },
+    {
+      "name": "7. Store Courier (Validation Error - 422)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Invalid Courier\",\n  \"phone\": \"081999888777\",\n  \"level\": 8\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/couriers",
+          "host": ["{{base_url}}"],
+          "path": ["couriers"]
+        }
+      }
+    },
+    {
+      "name": "8. Update Courier (Success - 200)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Budiono Hadi Agung (Promoted)\",\n  \"level\": 5\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/couriers/1",
+          "host": ["{{base_url}}"],
+          "path": ["couriers", "1"]
+        }
+      }
+    },
+    {
+      "name": "9. Delete Courier (Success - 200)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/couriers/1",
+          "host": ["{{base_url}}"],
+          "path": ["couriers", "1"]
+        }
+      }
+    }
+  ]
+}

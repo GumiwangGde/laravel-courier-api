@@ -1,58 +1,198 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Courier Management RESTful API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+RESTful API untuk pengelolaan master data kurir (Courier) yang dibangun menggunakan Laravel dan Pest PHP sesuai dengan spesifikasi teknis wawancara.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tech Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Framework:** Laravel 12.x / PHP 8.3+
+- **Database:** SQLite (Default, zero external configuration)
+- **Testing:** Pest PHP (`pestphp/pest`)
+- **Code Style:** Laravel Pint (`laravel/pint`)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Fitur Utama
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **CRUD Lengkap Kurir**: Endpoint `index`, `show`, `store`, `update`, dan `destroy`.
+- **Tokenized Search**: Query `?search=budi+agung` mencocokkan nama `"Budiono Hadi Agung"` dengan memecah input menjadi token kata individual (tidak kaku dengan substring tunggal).
+- **Level Filtering**: Mendukung filter kurir berdasarkan level (rentang level 1–5) dengan format string dipisahkan koma (`?level=2,3`) maupun array.
+- **Dynamic Sorting**: Default sort berdasarkan nama kurir (A–Z), dengan opsi override pengurutan berdasarkan tanggal pendaftaran (`?sort_by=registered_at&order=desc`).
+- **Pagination**: Output list otomatis menyertakan pagination meta (`current_page`, `per_page`, `total`, `links`).
+- **Standardized Response**: Format response konsisten menggunakan Eloquent API Resource (`CourierResource`).
+- **Robust Validation**: Validasi request terisolasi pada `StoreCourierRequest` dan `UpdateCourierRequest`, termasuk validasi nomor telepon unik (ignore ID pada update).
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Panduan Instalasi & Menjalankan Project
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+### 1. Clone Repository & Install Dependencies
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <repository-url>
+cd laravel-courier-api
+composer install
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Setup Environment
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Contributing
+### 3. Setup Database & Seeding
+Database menggunakan SQLite. Buat file database (jika belum ada) lalu jalankan migrasi dan seeder:
+```bash
+# Windows PowerShell
+if (!(Test-Path database/database.sqlite)) { New-Item database/database.sqlite }
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Jalankan migrasi dan seeder
+php artisan migrate --seed
+```
 
-## Code of Conduct
+> **Catatan Seeder:** Seeder otomatis membuat data pengujian spesifik termasuk `"Budiono Hadi Agung"` (Level 3) beserta 24 data kurir lainnya untuk kemudahan pengujian pagination dan pencarian.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Jalankan Local Server
+```bash
+php artisan serve
+```
+API server aktif di: `http://127.0.0.1:8000`
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Menjalankan Automated Tests
 
-## License
+Test suite ditulis menggunakan **Pest PHP** dan mencakup seluruh skenario fungsionalitas, validasi input, status kode HTTP, serta integritas data di database:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+# Menjalankan seluruh test kurir
+php artisan test --filter=CourierApiTest
+
+# Menjalankan seluruh test suite aplikasi
+php artisan test
+```
+
+### Cakupan Pengujian:
+1. `it can list couriers with pagination and default sorting by name ascending`
+2. `it can override default sorting to sort by registered_at date`
+3. `it matches multi-keyword search such as budi agung to Budiono Hadi Agung`
+4. `it can filter couriers by comma-separated levels like 2,3`
+5. `it returns all data for a single courier on show endpoint`
+6. `it returns 404 when showing non-existent courier`
+7. `it validates and stores a courier in database` (memastikan `assertDatabaseHas`)
+8. `it fails validation when storing courier with level outside 1-5` (HTTP 422)
+9. `it validates and updates an existing courier in database`
+10. `it deletes a courier and confirms removal from database` (memastikan `assertDatabaseMissing`)
+
+---
+
+## Dokumentasi API (Endpoints)
+
+Base URL: `http://127.0.0.1:8000/api`
+
+Header default untuk semua request:
+```http
+Accept: application/json
+Content-Type: application/json
+```
+
+| Method | Endpoint | Deskripsi |
+| :--- | :--- | :--- |
+| `GET` | `/couriers` | List kurir dengan pagination, sorting, search, & filter |
+| `POST` | `/couriers` | Tambah kurir baru (Validasi lengkap) |
+| `GET` | `/couriers/{id}` | Detail satu data kurir |
+| `PUT/PATCH` | `/couriers/{id}` | Update data kurir |
+| `DELETE` | `/couriers/{id}` | Hapus kurir dari database |
+
+---
+
+### Query Parameters pada `GET /api/couriers`
+
+| Parameter | Tipe | Contoh | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `search` | string | `?search=budi+agung` | Mencari kurir berdasarkan kata kunci nama (multi-kata didukung). |
+| `level` | string | `?level=2,3` | Memfilter kurir hanya dengan level tertentu (1–5). |
+| `sort_by` | string | `?sort_by=registered_at` | Kolom pengurutan: `name`, `registered_at`, `created_at`, `level`. |
+| `order` | string | `?order=desc` | Arah pengurutan: `asc` (default) atau `desc`. |
+| `per_page` | integer | `?per_page=10` | Jumlah item per halaman (default 10). |
+| `page` | integer | `?page=2` | Nomor halaman pagination. |
+
+---
+
+### Contoh Payload Request & Response
+
+#### 1. `POST /api/couriers` (Store)
+**Request Body:**
+```json
+{
+  "name": "Budi Hartono",
+  "phone": "081298765432",
+  "email": "budi.hartono@example.com",
+  "level": 3,
+  "is_active": true,
+  "registered_at": "2026-09-18 10:00:00"
+}
+```
+
+**Response (`201 Created`):**
+```json
+{
+  "data": {
+    "id": 26,
+    "name": "Budi Hartono",
+    "phone": "081298765432",
+    "email": "budi.hartono@example.com",
+    "level": 3,
+    "is_active": true,
+    "registered_at": "2026-09-18T10:00:00.000000Z",
+    "created_at": "2026-09-18T13:40:00.000000Z",
+    "updated_at": "2026-09-18T13:40:00.000000Z"
+  }
+}
+```
+
+#### 2. `POST /api/couriers` (Validation Error)
+Jika `level` diisi angka selain 1–5 atau nomor `phone` duplikat:
+
+**Response (`422 Unprocessable Content`):**
+```json
+{
+  "message": "The level field must be between 1 and 5.",
+  "errors": {
+    "level": [
+      "The level field must be between 1 and 5."
+    ]
+  }
+}
+```
+
+#### 3. `DELETE /api/couriers/{id}` (Destroy)
+**Response (`200 OK`):**
+```json
+{
+  "message": "Courier deleted successfully."
+}
+```
+
+---
+
+## Import Postman / EchoAPI Collection
+
+Repository ini telah dilengkapi file koleksi yang siap di-import:
+- File: [`courier-api.postman_collection.json`](./courier-api.postman_collection.json)
+
+**Langkah Import:**
+1. Buka Postman, EchoAPI, atau Insomnia.
+2. Klik tombol **Import**.
+3. Pilih file `courier-api.postman_collection.json` di direktori root repository ini.
+4. Semua request (beserta parameter search, sort, filter level, dan contoh JSON body) akan langsung siap digunakan.
+
+---
+
+## Keputusan Arsitektur & Best Practices
+
+- **Form Request Validation**: Validasi dipisahkan dari controller (`StoreCourierRequest` dan `UpdateCourierRequest`) demi mematuhi *Single Responsibility Principle*.
+- **API Resource**: Menggunakan `CourierResource` untuk enkapsulasi format representasi JSON dan pemisahan lapisan presentasi dari struktur tabel database.
+- **Model Scopes**: Logika pencarian multi-kata (`scopeSearch`) dan filter level (`scopeFilterByLevel`) diisolasi di model `Courier`, menjaga controller tetap bersih dan ringkas.
+- **Tokenized Search Implementation**: Query pencarian dipecah per spasi sehingga kata `budi` dan `agung` masing-masing dicocokkan dengan klausa `LIKE '%...%'`, memungkinkan penemuan nama kompleks seperti `"Budiono Hadi Agung"`.
+- **Allowed Sort Whitelist**: Mengamankan query pengurutan terhadap potensi error maupun SQL injection dengan memvalidasi nama kolom terhadap daftar whitelist.

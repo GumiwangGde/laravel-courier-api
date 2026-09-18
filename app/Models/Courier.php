@@ -43,7 +43,7 @@ class Courier extends Model
 
         return $query->where(function (Builder $q) use ($keywords) {
             foreach ($keywords as $word) {
-                $q->where('name', 'like', "%{ $word }%");
+                $q->where('name', 'like', '%'.$word.'%');
             }
         });
     }
