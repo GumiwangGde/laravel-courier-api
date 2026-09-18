@@ -99,7 +99,10 @@ test('it returns all data for a single courier on show endpoint', function () {
 test('it returns 404 when showing non-existent courier', function () {
     $response = getJson('/api/couriers/99999');
 
-    $response->assertNotFound();
+    $response->assertNotFound()
+        ->assertJson([
+            'message' => 'Courier not found.',
+        ]);
 });
 
 test('it validates and stores a courier in database', function () {
